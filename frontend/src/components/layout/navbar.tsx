@@ -19,7 +19,7 @@ import {
 } from '@heroui/react';
 import { Icon } from '@iconify/react';
 import { useCart } from '../../hooks/use-cart';
-import { navCategories } from '../../data/categories';
+import { fetchCategories, ApiCategory } from '../../api';
 import { SearchAutocomplete } from '../search/search-autocomplete';
 
 export const Navbar: React.FC = () => {
@@ -27,6 +27,21 @@ export const Navbar: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
   const [isUserLoggedIn, setIsUserLoggedIn] = React.useState(false);
   const navigate = useNavigate();
+  const [dynamicNavCategories, setDynamicNavCategories] = React.useState<ApiCategory[]>([]);
+
+   React.useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const categories = await fetchCategories();
+        setDynamicNavCategories(categories);
+      } catch (error) {
+        console.error("Ошибка при загрузке категорий:", error);
+        // Здесь можно обработать ошибку, например, показать уведомление
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   // Mock login function for demo
   const handleLogin = () => {
@@ -53,50 +68,58 @@ export const Navbar: React.FC = () => {
               <p className="font-bold text-lg text-inherit">TechGear</p>
             </div>
           </NavbarBrand>
-          
-          <div className="hidden lg:flex gap-4">
-            {navCategories.map((category) => (
-              <div key={category.id} className="navbar-dropdown-trigger relative group">
-                <NavbarItem>
-                  <Link 
-                    to={`/category/${category.id}`}
-                    className="flex items-center gap-1 px-2 py-2 text-sm font-medium text-default-700 hover:text-primary"
-                  >
-                    {category.name}
-                    <Icon icon="lucide:chevron-down" className="w-4 h-4" />
-                  </Link>
-                </NavbarItem>
-                
-                {/* Mega dropdown menu */}
-                <div className="navbar-dropdown">
-                  <div className="bg-white border shadow-lg rounded-lg p-4 grid grid-cols-3 gap-4 w-[700px]">
-                    {category.subcategories.map((subcategory) => (
-                      <div key={subcategory.id} className="space-y-2">
-                        <Link 
-                          to={`/category/${category.id}/${subcategory.id}`}
-                          className="font-medium text-default-700 hover:text-primary block"
+           <div className="hidden lg:flex gap-4">
+  {dynamicNavCategories.map((category) => (
+    <div key={category.id} className="navbar-dropdown-trigger relative group">
+      <NavbarItem>
+        {/* Ссылка на категорию верхнего уровня */}
+        <Link
+          to={`/category/${category.slug}`}
+          className="flex items-center gap-1 px-2 py-2 text-sm font-medium text-default-700 hover:text-primary"
+        >
+          {category.name}
+          <Icon icon="lucide:chevron-down" className="w-4 h-4" />
+        </Link>
+      </NavbarItem>
+
+      {/* Выпадающее мега-меню */}
+      {/* Проверяем, есть ли у категории дочерние элементы */}
+      {category.children && category.children.length > 0 && (
+        <div className="navbar-dropdown">
+          {/* Ширину можно будет настроить в зависимости от кол-ва колонок */}
+          <div className="bg-white border shadow-lg rounded-lg p-4 grid grid-cols-3 gap-3 w-[700px]">
+            {/* Рендерим дочерние категории (2-й уровень) */}
+            {category.children.map((subcategory) => (
+              <div key={subcategory.id} className="space-y-2">
+                <Link
+                  to={`/category/${subcategory.slug}`}
+                  className="font-medium text-default-700 hover:text-primary block"
+                >
+                  {subcategory.name}
+                </Link>
+                {/* Рендерим категории 3-го уровня, если они есть */}
+                {subcategory.children && subcategory.children.length > 0 && (
+                  <ul className="space-y-1">
+                    {subcategory.children.map((item) => (
+                      <li key={item.id}>
+                        <Link
+                          to={`/category/${item.slug}`}
+                          className="text-xs text-default-600 hover:text-primary block"
                         >
-                          {subcategory.name}
+                          {item.name}
                         </Link>
-                        <ul className="space-y-1">
-                          {subcategory.items.map((item) => (
-                            <li key={item.id}>
-                              <Link 
-                                to={`/category/${category.id}/${subcategory.id}/${item.id}`}
-                                className="text-xs text-default-600 hover:text-primary block"
-                              >
-                                {item.name}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                      </li>
                     ))}
-                  </div>
-                </div>
+                  </ul>
+                )}
               </div>
             ))}
           </div>
+        </div>
+      )}
+    </div>
+  ))}
+</div>
         </NavbarContent>
         
         <NavbarContent className="hidden sm:flex" justify="center">
@@ -108,7 +131,7 @@ export const Navbar: React.FC = () => {
             {isUserLoggedIn ? (
               <Dropdown placement="bottom-end">
                 <DropdownTrigger>
-                  <Avatar 
+                  <Avatar
                     as="button"
                     className="transition-transform"
                     size="sm"
@@ -175,11 +198,11 @@ export const Navbar: React.FC = () => {
               </DropdownTrigger>
               <DropdownMenu aria-label="Mobile navigation">
                 <DropdownItem key="home" as={Link} to="/">Home</DropdownItem>
-                {navCategories.map((category) => (
+                {dynamicNavCategories.map((category) => (
                   <DropdownItem
                     key={category.id}
                     as={Link}
-                    to={`/category/${category.id}`}
+                    to={`/category/${category.slug}`}
                   >
                     {category.name}
                   </DropdownItem>

@@ -41,3 +41,19 @@ export const createOrder = async (orderData: OrderPayload) => {
   // Если все хорошо, возвращаем созданный заказ
   return await response.json();
 };
+
+export interface ApiCategory {
+  id: number;
+  name: string;
+  slug: string;
+  image: string | null;
+  children: ApiCategory[];
+}
+
+export const fetchCategories = async (): Promise<ApiCategory[]> => {
+  const response = await fetch(`${API_BASE_URL}/categories/`);
+  if (!response.ok) {
+    throw new Error('Не удалось загрузить категории');
+  }
+  return await response.json();
+};

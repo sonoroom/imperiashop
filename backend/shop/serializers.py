@@ -101,3 +101,19 @@ class OrderCreateSerializer(serializers.ModelSerializer):
         # send_mail_to_client(order)
 
         return order
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    """ Сериализатор для позиций внутри детального заказа """
+    class Meta:
+        model = OrderItem
+        fields = ['product_name', 'quantity', 'price']
+
+class OrderDetailSerializer(serializers.ModelSerializer):
+    """ Сериализатор для детального отображения одного заказа """
+    items = OrderItemSerializer(many=True, read_only=True)
+    # Превращаем status из 'new' в 'Новый' для удобства фронтенда
+    status = serializers.CharField(source='get_status_display')
+
+    class Meta:
+        model = Order
+        fields = ['id', 'created_at', 'status', 'items', 'get_total_cost']

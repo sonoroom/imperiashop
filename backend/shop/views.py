@@ -3,6 +3,11 @@
 from rest_framework import generics
 from .models import Category, Product
 from .serializers import CategorySerializer, ProductListSerializer, ProductDetailSerializer, OrderCreateSerializer
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .models import Order
+from .serializers import OrderDetailSerializer
 
 
 
@@ -37,3 +42,29 @@ class OrderCreateView(generics.CreateAPIView):
     Принимает только POST-запросы.
     """
     serializer_class = OrderCreateSerializer
+
+class OrderLookupView(APIView):
+    """
+    Представление для поиска заказа по его ID и email клиента.
+    Принимает POST-запросы.
+    """
+    def post(self, request, *args, **kwargs):
+        order_id = request.data.get('order_id')
+        email = request.data.get('email')
+
+        if not order_id or not email:
+            return Response(
+                {"error": "Необходимо указать номер заказа и email"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Ищем заказ, который соответствует обоим параметрам
+            order = Order.objects.get(id=order_id, email=email)
+            serializer = OrderDetailSerializer(order)
+            return Response(serializer.data)
+        except Order.DoesNotExist:
+            return Response(
+                {"error": "Заказ с такими данными не найден"},
+                status=status.HTTP_404_NOT_FOUND
+            )

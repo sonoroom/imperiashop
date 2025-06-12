@@ -214,7 +214,42 @@ export const navCategories: Category[] = [
       },
     ]
   },
+    {
+    id: "accessories",
+    name: "Accessories",
+    subcategories: [
+      {
+        id: "cooling",
+        name: "Cooling",
+        items: [
+          { id: "cpu-coolers", name: "CPU Coolers" },
+          { id: "case-fans", name: "Case Fans" },
+          { id: "liquid-cooling", name: "Liquid Cooling" },
+        ]
+      },
+      {
+        id: "cables",
+        name: "Cables & Adapters",
+        items: [
+          { id: "hdmi", name: "HDMI Cables" },
+          { id: "displayport", name: "DisplayPort Cables" },
+          { id: "usb", name: "USB Cables" },
+          { id: "power-cables", name: "Power Cables" },
+        ]
+      },
+      {
+        id: "tools",
+        name: "Tools & Maintenance",
+        items: [
+          { id: "tool-kits", name: "Tool Kits" },
+          { id: "cleaning", name: "Cleaning Supplies" },
+          { id: "thermal-paste", name: "Thermal Paste" },
+        ]
+      },
+    ]
+  },
 ];
+
 
 // Featured categories for the homepage
 export const featuredCategories = [
@@ -253,7 +288,14 @@ export const featuredCategories = [
     image: "https://img.heroui.chat/image/dashboard?w=400&h=300&u=cat-storage",
     productCount: 112
   },
-  {
+      {
+    id: "monitors",
+    name: "Monitors",
+    description: "Gaming, professional and ultrawide displays",
+    image: "https://img.heroui.chat/image/dashboard?w=400&h=300&u=cat-monitor",
+    productCount: 68
+  },
+    {
     id: "monitors",
     name: "Monitors",
     description: "Gaming, professional and ultrawide displays",
